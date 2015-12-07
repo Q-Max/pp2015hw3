@@ -101,11 +101,21 @@ int main(int argc, char** argv)
 	int *buf2 = &buf[1];
 	if(rank==ROOT)
 		pthread_create(&tid, NULL, workPool, (void *) NULL);
+	if(rank==ROOT) {
+		pthread_join(tid, NULL);
+		if(!disableX)
+			XFlush(display);
+		sleep(5);
+		puts("Finish");
+		MPI_Barrier(MPI_COMM_WORLD);
+		MPI_Finalize();
+		return 0;
+	}
 
 	do{
 		MPI_Recv(&k, 1, MPI_INT, ROOT, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 		if(status.MPI_TAG==TERMINATE_TAG){
-			break;		
+			break;
 		}
 		if(k==N_TIMES*size-1){
 			max_i = (k+1)*pernode+retainer;
@@ -143,20 +153,21 @@ int main(int argc, char** argv)
 		MPI_Send(&i, 1, MPI_INT, ROOT, SEND_INIT_TAG, MPI_COMM_WORLD);//, &req);
 		MPI_Send(buf, i + 1, MPI_INT, ROOT, SEND_COMP_TAG, MPI_COMM_WORLD);//, &req);
 	} while(1);	
-	if(rank==ROOT)
+	/*if(rank==ROOT)
 		pthread_join(tid, NULL);
-	if(!disableX&&rank==ROOT) {
+	if(!disableX&&rank==ROOT) {*/
 		
 		/*for(i=0;i<width;i++)
 			for(j=0;j<height;j++){
 				XSetForeground (display, gc,  1024 * 1024 * (repeats[i*height + j] % 256));
 				XDrawPoint (display, window, gc, i, j);
 			}*/
-		XFlush(display);
+		/*XFlush(display);
 		sleep(5);
 	}
 	if(!rank)
-		puts("Finish");
+		puts("Finish");*/
+	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_Finalize();
 	return 0;
 }
@@ -173,8 +184,8 @@ void *workPool(void* arg){
 	int i, j, count=0, working_slave=0, k;
 	MPI_Status status;
 	MPI_Request req;
-	for(i=0;i<size;i++) {
-		MPI_Send(&i, 1, MPI_INT, i, TASK_TAG, MPI_COMM_WORLD);//, &req);
+	for(i=0;i<size-1;i++) {
+		MPI_Send(&i, 1, MPI_INT, i+1, TASK_TAG, MPI_COMM_WORLD);//, &req);
 		count++;
 		working_slave++;
 	}
