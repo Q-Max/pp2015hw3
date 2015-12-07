@@ -96,5 +96,6 @@ int main(int argc, char** argv)
 		XFlush(display);
 		sleep(5);
 	}
+	puts("Finish");
 	return 0;
 }
