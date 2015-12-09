@@ -90,7 +90,7 @@ int main(int argc, char** argv)
 	Compl z, c;
 	
 	double temp, lengthsq;
-	int i, j, k, max_i, m;
+	int i, j, k, max_i;
 	pernode = width/(N_TIMES*size);
 #ifdef DEBUG
 	printf("pernode:%d\n",pernode);
@@ -127,21 +127,22 @@ int main(int argc, char** argv)
 			max_i = ((k+1)*pernode);
 		}
 		buf[0] = k * pernode * height;
-		for(i=k*pernode,m=0;i<max_i;i++,m++){
+		#pragma omp parallel for private(i,j,z,c,lengthsq,temp)
+		for(i=k*pernode;i<max_i;i++){
 			for(j=0; j<height; j++) {
 				z.real = 0.0;
 				z.imag = 0.0;
 				c.real = ((double)i + xmin * xper)/xper; /* Theorem : If c belongs to M(Mandelbrot set), then |c| <= 2 */
 				c.imag = ((double)j + ymin * yper)/yper; /* So needs to scale the window */
-				buf2[m*height + j] = 0;
+				buf2[(i-k*pernode)*height + j] = 0;
 				lengthsq = 0.0;
 
-				while(buf2[m*height + j] < 100000 && lengthsq < 4.0) { /* Theorem : If c belongs to M, then |Zn| <= 2. So Zn^2 <= 4 */
+				while(buf2[(i-k*pernode)*height + j] < 100000 && lengthsq < 4.0) { /* Theorem : If c belongs to M, then |Zn| <= 2. So Zn^2 <= 4 */
 					temp = z.real*z.real - z.imag*z.imag + c.real;
 					z.imag = 2*z.real*z.imag + c.imag;
 					z.real = temp;
 					lengthsq = z.real*z.real + z.imag*z.imag; 
-					buf2[m*height + j]++;
+					buf2[(i-k*pernode)*height + j]++;
 				}
 
 			}
@@ -149,9 +150,9 @@ int main(int argc, char** argv)
 			printf("rank: %d working %d times\n", rank, buf2[m*height + j]);
 #endif
 		}
-		i = m * height;
-		MPI_Send(&i, 1, MPI_INT, ROOT, SEND_INIT_TAG, MPI_COMM_WORLD);//, &req);
-		MPI_Send(buf, i + 1, MPI_INT, ROOT, SEND_COMP_TAG, MPI_COMM_WORLD);//, &req);
+		i = (max_i - (k * pernode)) * height;
+		MPI_Isend(&i, 1, MPI_INT, ROOT, SEND_INIT_TAG, MPI_COMM_WORLD, &req);
+		MPI_Isend(buf, i + 1, MPI_INT, ROOT, SEND_COMP_TAG, MPI_COMM_WORLD, &req);
 	} while(1);	
 	/*if(rank==ROOT)
 		pthread_join(tid, NULL);
@@ -185,7 +186,7 @@ void *workPool(void* arg){
 	MPI_Status status;
 	MPI_Request req;
 	for(i=0;i<size-1;i++) {
-		MPI_Send(&i, 1, MPI_INT, i+1, TASK_TAG, MPI_COMM_WORLD);//, &req);
+		MPI_Isend(&i, 1, MPI_INT, i+1, TASK_TAG, MPI_COMM_WORLD, &req);
 		count++;
 		working_slave++;
 	}
@@ -205,7 +206,7 @@ void *workPool(void* arg){
 		working_slave--;
 		if(count<totalsize) {
 			k = count;
-			MPI_Send(&k, 1, MPI_INT, status.MPI_SOURCE, TASK_TAG, MPI_COMM_WORLD);//, &req);
+			MPI_Isend(&k, 1, MPI_INT, status.MPI_SOURCE, TASK_TAG, MPI_COMM_WORLD, &req);
 #ifdef DEBUG
 			printf("count = %2d   slave = %2d\n",k, status.MPI_SOURCE);
 #endif
