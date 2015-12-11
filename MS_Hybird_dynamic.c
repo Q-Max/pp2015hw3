@@ -90,7 +90,7 @@ int main(int argc, char** argv)
 	Compl z, c;
 	
 	double temp, lengthsq;
-	int i, j, k, max_i;
+	int i, j, k, max_i, repeats;
 	pernode = width/(N_TIMES*size);
 #ifdef DEBUG
 	printf("pernode:%d\n",pernode);
@@ -99,6 +99,36 @@ int main(int argc, char** argv)
 	totalsize = N_TIMES*size;
 	int *buf = malloc(sizeof(int)*((pernode+retainer)*height+1));
 	int *buf2 = &buf[1];
+	if(size==1){
+		for(i=0; i<width; i++) {
+        	        for(j=0; j<height; j++) {
+	                        z.real = 0.0;
+                        	z.imag = 0.0;
+                	        c.real = ((double)i + xmin * xper)/xper; /* Theorem : If c belongs to M(Mandelbrot set), then |c| <= 2 */
+        	                c.imag = ((double)j + ymin * yper)/yper; /* So needs to scale the window */
+	                        repeats = 0;
+                        	lengthsq = 0.0;
+
+                	        while(repeats < 100000 && lengthsq < 4.0) { /* Theorem : If c belongs to M, then |Zn| <= 2. So Zn^2 <= 4 */
+        	                        temp = z.real*z.real - z.imag*z.imag + c.real;
+	                                z.imag = 2*z.real*z.imag + c.imag;
+                                	z.real = temp;
+                        	        lengthsq = z.real*z.real + z.imag*z.imag;
+                	                repeats++;
+        	                }
+	                        if(!disableX){
+                                	XSetForeground (display, gc,  1024 * 1024 * (repeats % 256));
+                        	        XDrawPoint (display, window, gc, i, j);
+                	        }
+        	        }
+	        }
+        	if(!disableX) {
+	                XFlush(display);
+                	sleep(5);
+        	}
+	        puts("Finish");
+		return 0;
+	}
 	if(rank==ROOT)
 		pthread_create(&tid, NULL, workPool, (void *) NULL);
 	if(rank==ROOT) {
