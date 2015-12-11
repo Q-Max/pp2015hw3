@@ -126,6 +126,8 @@ int main(int argc, char** argv)
                         XFlush(display);
                         sleep(5);
                 }
+		puts("Finish");
+		return 0;
 	}
 	if(rank==ROOT)
 		pthread_create(&tid, NULL, workPool, (void *) NULL);
