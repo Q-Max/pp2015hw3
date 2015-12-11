@@ -5,7 +5,7 @@
 #include <X11/Xlib.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
 typedef struct complextype
 {
 	double real, imag;
@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 	Window window;      //initialization for a window
 	int screen;         //which screen 
 
-	const int n = atoi(argv[1]);
+	//const int n = atoi(argv[1]);
 	const double xmin = atof(argv[2]);
 	const double xmax = atof(argv[3]);
 	const double ymin = atof(argv[4]);

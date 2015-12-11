@@ -20,3 +20,10 @@ all:
 	
 clean:
 	rm MS_seq MS_OpenMP_static MS_OpenMP_dynamic MS_MPI_static MS_MPI_dynamic MS_Hybird_static MS_HYbird_dynamic
+test:
+	time ./MS_OpenMP_static 4 -2 2 -2 2 800 800 enable
+	time ./MS_OpenMP_dynamic 4 -2 2 -2 2 800 800 enable
+	time mpiexec -np 4 ./MS_MPI_static 4 -2 2 -2 2 800 800 enable
+	time mpiexec -np 4 ./MS_MPI_dynamic 4 -2 2 -2 2 800 800 enable
+	time mpiexec -np 2 ./MS_Hybird_static 2 -2 2 -2 2 800 800 enable
+	time mpiexec -np 2 ./MS_Hybird_dynamic 2 -2 2 -2 2 800 800 enable

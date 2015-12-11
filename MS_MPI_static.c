@@ -117,7 +117,7 @@ int main(int argc, char** argv)
 			}
 		}
 		else{
-			MPI_Send(&repeats[k*pernode*height],(max_i-k*pernode)*height,MPI_INT,ROOT,0,MPI_COMM_WORLD);//,&req);
+			MPI_Isend(&repeats[k*pernode*height],(max_i-k*pernode)*height,MPI_INT,ROOT,0,MPI_COMM_WORLD,&req);
 		}
 	}
 	

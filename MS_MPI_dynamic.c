@@ -150,8 +150,8 @@ int main(int argc, char** argv)
 #endif
 		}
 		i = m * height;
-		MPI_Send(&i, 1, MPI_INT, ROOT, SEND_INIT_TAG, MPI_COMM_WORLD);//, &req);
-		MPI_Send(buf, i + 1, MPI_INT, ROOT, SEND_COMP_TAG, MPI_COMM_WORLD);//, &req);
+		MPI_Isend(&i, 1, MPI_INT, ROOT, SEND_INIT_TAG, MPI_COMM_WORLD, &req);
+		MPI_Isend(buf, i + 1, MPI_INT, ROOT, SEND_COMP_TAG, MPI_COMM_WORLD, &req);
 	} while(1);	
 	/*if(rank==ROOT)
 		pthread_join(tid, NULL);
@@ -185,7 +185,7 @@ void *workPool(void* arg){
 	MPI_Status status;
 	MPI_Request req;
 	for(i=0;i<size-1;i++) {
-		MPI_Send(&i, 1, MPI_INT, i+1, TASK_TAG, MPI_COMM_WORLD);//, &req);
+		MPI_Isend(&i, 1, MPI_INT, i+1, TASK_TAG, MPI_COMM_WORLD, &req);
 		count++;
 		working_slave++;
 	}
@@ -205,7 +205,7 @@ void *workPool(void* arg){
 		working_slave--;
 		if(count<totalsize) {
 			k = count;
-			MPI_Send(&k, 1, MPI_INT, status.MPI_SOURCE, TASK_TAG, MPI_COMM_WORLD);//, &req);
+			MPI_Isend(&k, 1, MPI_INT, status.MPI_SOURCE, TASK_TAG, MPI_COMM_WORLD, &req);
 #ifdef DEBUG
 			printf("count = %2d   slave = %2d\n",k, status.MPI_SOURCE);
 #endif
