@@ -31,15 +31,17 @@ XGCValues values;
 int main(int argc, char** argv)
 {
 	int rank;
+	double start, finish;
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Status status;
 	MPI_Request req;
-	
+	long int comp=0;	
 	int screen;         //which screen 
 	pthread_t tid;
 	//const int n = atoi(argv[1]);
+	start = MPI_Wtime();
 	const double xmin = atof(argv[2]);
 	const double xmax = atof(argv[3]);
 	const double ymin = atof(argv[4]);
@@ -102,6 +104,7 @@ int main(int argc, char** argv)
 	if(size==1){
 		for(i=0; i<width; i++) {
         	        for(j=0; j<height; j++) {
+				comp++;
 	                        z.real = 0.0;
                         	z.imag = 0.0;
                 	        c.real = ((double)i + xmin * xper)/xper; /* Theorem : If c belongs to M(Mandelbrot set), then |c| <= 2 */
@@ -126,17 +129,21 @@ int main(int argc, char** argv)
 	                XFlush(display);
                 	sleep(5);
         	}
+		finish = MPI_Wtime();
 	        puts("Finish");
+		printf("rank %d comp %ld take %lf sec\n",rank, comp, finish - start);
 		return 0;
 	}
-	if(rank==ROOT)
+	if(rank==ROOT){
 		pthread_create(&tid, NULL, workPool, (void *) NULL);
-	if(rank==ROOT) {
 		pthread_join(tid, NULL);
-		if(!disableX)
+		if(!disableX){
 			XFlush(display);
-		sleep(5);
+			sleep(5);
+		}
 		puts("Finish");
+		finish = MPI_Wtime();
+		printf("rank %d comp %ld take %lf sec\n",rank, comp, finish - start);
 		MPI_Barrier(MPI_COMM_WORLD);
 		MPI_Finalize();
 		return 0;
@@ -160,6 +167,7 @@ int main(int argc, char** argv)
 		#pragma omp parallel for private(i,j,z,c,lengthsq,temp)
 		for(i=k*pernode;i<max_i;i++){
 			for(j=0; j<height; j++) {
+				comp++;
 				z.real = 0.0;
 				z.imag = 0.0;
 				c.real = ((double)i + xmin * xper)/xper; /* Theorem : If c belongs to M(Mandelbrot set), then |c| <= 2 */
@@ -198,6 +206,8 @@ int main(int argc, char** argv)
 	}
 	if(!rank)
 		puts("Finish");*/
+	finish = MPI_Wtime();
+	printf("rank %d comp %ld take %lf sec\n",rank, comp, finish - start);
 	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_Finalize();
 	return 0;

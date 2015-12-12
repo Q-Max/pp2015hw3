@@ -133,9 +133,10 @@ int main(int argc, char** argv)
 		pthread_create(&tid, NULL, workPool, (void *) NULL);
 	if(rank==ROOT) {
 		pthread_join(tid, NULL);
-		if(!disableX)
+		if(!disableX){
 			XFlush(display);
-		sleep(5);
+			sleep(5);
+		}
 		puts("Finish");
 		MPI_Barrier(MPI_COMM_WORLD);
 		MPI_Finalize();

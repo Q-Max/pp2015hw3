@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 	
 	#pragma omp parallel private(i, j ,temp, lengthsq, z, c)
 	{
-		#pragma omp for schedule(dynamic, 20)
+		#pragma omp for schedule(dynamic, 4)
 		for(i=0; i<height; i++) {		
 			for(j=0; j<width; j++) {
 				z.real = 0.0;
