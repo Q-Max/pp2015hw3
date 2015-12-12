@@ -144,7 +144,6 @@ int main(int argc, char** argv)
 		puts("Finish");
 		finish = MPI_Wtime();
 		printf("rank %d comp %ld take %lf sec\n",rank, comp, finish - start);
-		MPI_Barrier(MPI_COMM_WORLD);
 		MPI_Finalize();
 		return 0;
 	}
@@ -208,7 +207,6 @@ int main(int argc, char** argv)
 		puts("Finish");*/
 	finish = MPI_Wtime();
 	printf("rank %d comp %ld take %lf sec\n",rank, comp, finish - start);
-	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_Finalize();
 	return 0;
 }

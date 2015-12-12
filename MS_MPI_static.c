@@ -26,7 +26,9 @@ int main(int argc, char** argv)
 	Display *display;
 	Window window;      //initialization for a window
 	int screen;         //which screen 
-
+	long int comp=0;
+	double start, finish;
+	start = MPI_Wtime();
 	//const int n = atoi(argv[1]);
 	const double xmin = atof(argv[2]);
 	const double xmax = atof(argv[3]);
@@ -92,6 +94,7 @@ int main(int argc, char** argv)
 		}
 		for(i=k*pernode; i<max_i; i++) {
 			for(j=0; j<height; j++) {
+				comp++;
 				z.real = 0.0;
 				z.imag = 0.0;
 				c.real = ((double)i + xmin * xper)/xper; /* Theorem : If c belongs to M(Mandelbrot set), then |c| <= 2 */
@@ -132,6 +135,8 @@ int main(int argc, char** argv)
 	}
 	if(!rank)
 		puts("Finish");
+	finish = MPI_Wtime();
+	printf("rank %d comp %ld take %lf sec\n",rank, comp, finish - start);
 	MPI_Finalize();
 	return 0;
 }

@@ -36,7 +36,9 @@ int main(int argc, char** argv)
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Status status;
 	MPI_Request req;
-	
+	long int comp=0;
+	double start, finish;
+	start = MPI_Wtime();	
 	int screen;         //which screen 
 	pthread_t tid;
 	//const int n = atoi(argv[1]);
@@ -138,7 +140,8 @@ int main(int argc, char** argv)
 			sleep(5);
 		}
 		puts("Finish");
-		MPI_Barrier(MPI_COMM_WORLD);
+		finish = MPI_Wtime();
+		printf("rank %d comp %ld take %lf sec\n",rank, comp, finish - start);
 		MPI_Finalize();
 		return 0;
 	}
@@ -160,6 +163,7 @@ int main(int argc, char** argv)
 		buf[0] = k * pernode * height;
 		for(i=k*pernode,m=0;i<max_i;i++,m++){
 			for(j=0; j<height; j++) {
+				comp++;
 				z.real = 0.0;
 				z.imag = 0.0;
 				c.real = ((double)i + xmin * xper)/xper; /* Theorem : If c belongs to M(Mandelbrot set), then |c| <= 2 */
@@ -198,7 +202,8 @@ int main(int argc, char** argv)
 	}
 	if(!rank)
 		puts("Finish");*/
-	MPI_Barrier(MPI_COMM_WORLD);
+	finish = MPI_Wtime();
+	printf("rank %d comp %ld take %lf sec\n",rank, comp, finish - start);
 	MPI_Finalize();
 	return 0;
 }
