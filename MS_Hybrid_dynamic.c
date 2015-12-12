@@ -10,7 +10,7 @@
 #include <string.h>
 
 #define ROOT 0
-#define N_TIMES 40
+#define N_TIMES 7
 #define TASK_TAG 0
 #define SEND_INIT_TAG 1
 #define SEND_COMP_TAG 2
