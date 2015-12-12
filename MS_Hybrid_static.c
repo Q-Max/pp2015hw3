@@ -93,10 +93,10 @@ int main(int argc, char** argv)
 		else{
 			max_i = (k+1) * pernode;
 		}
+		comp += (max_i-k*pernode)*height;
 		#pragma omp parallel for private(i,j,z,c,lengthsq,temp)
 		for(i=k*pernode; i<max_i; i++) {
 			for(j=0; j<height; j++) {
-				comp++;
 				z.real = 0.0;
 				z.imag = 0.0;
 				c.real = ((double)i + xmin * xper)/xper; /* Theorem : If c belongs to M(Mandelbrot set), then |c| <= 2 */

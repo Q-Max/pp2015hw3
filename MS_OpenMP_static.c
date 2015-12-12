@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <omp.h>
 #include <string.h>
+#include <sys/time.h>
+
 typedef struct complextype
 {
 	double real, imag;
@@ -17,7 +19,8 @@ int main(int argc, char** argv)
 	Display *display;
 	Window window;      //initialization for a window
 	int screen;         //which screen 
-
+	struct timeval tvalBefore, tvalAfter, tresult;
+	gettimeofday(&tvalBefore, NULL);
 	const int n = atoi(argv[1]);
 	omp_set_num_threads(n);
 	const double xmin = atof(argv[2]);
@@ -31,6 +34,7 @@ int main(int argc, char** argv)
 	const double yper = height/(ymax-ymin);
 	GC gc;
 	XGCValues values;
+	
 	/* set window size */
 	/*int width = 800;
 	int height = 800;*/
@@ -74,11 +78,13 @@ int main(int argc, char** argv)
 	int i, j;
 	
 	
-	#pragma omp parallel private(i, j ,temp, lengthsq, z, c)
+	#pragma omp parallel private(i, j ,temp, lengthsq, z, c, tvalAfter, tresult)
 	{
-		#pragma omp for schedule(static, 20)
+		long int comp=0;
+		#pragma omp for schedule(static, 4)
 		for(i=0; i<height; i++) {		
 			for(j=0; j<width; j++) {
+				comp++;
 				z.real = 0.0;
 				z.imag = 0.0;
 				c.real = ((double)j + xmin * xper)/xper; /* Theorem : If c belongs to M(Mandelbrot set), then |c| <= 2 */
@@ -95,6 +101,14 @@ int main(int argc, char** argv)
 				}
 			}		
 		}
+		gettimeofday(&tvalAfter, NULL);
+		tresult.tv_sec = tvalAfter.tv_sec-tvalBefore.tv_sec;
+		tresult.tv_usec = tvalAfter.tv_usec-tvalBefore.tv_usec;
+		if(tresult.tv_usec<0){
+			tresult.tv_sec--;
+			tresult.tv_usec+=1000000;
+		}		
+		printf("tid:%d comp %ld take %lf sec\n",omp_get_thread_num(),comp,tresult.tv_sec+((double)tresult.tv_usec)/1e6);
 	}	
 	if(!disableX) {		
 		for(i=0;i<height;i++)

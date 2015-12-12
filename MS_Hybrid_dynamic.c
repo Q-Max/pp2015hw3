@@ -166,7 +166,6 @@ int main(int argc, char** argv)
 		#pragma omp parallel for private(i,j,z,c,lengthsq,temp)
 		for(i=k*pernode;i<max_i;i++){
 			for(j=0; j<height; j++) {
-				comp++;
 				z.real = 0.0;
 				z.imag = 0.0;
 				c.real = ((double)i + xmin * xper)/xper; /* Theorem : If c belongs to M(Mandelbrot set), then |c| <= 2 */
@@ -188,6 +187,7 @@ int main(int argc, char** argv)
 #endif
 		}
 		i = (max_i - (k * pernode)) * height;
+		comp+=i;
 		MPI_Isend(&i, 1, MPI_INT, ROOT, SEND_INIT_TAG, MPI_COMM_WORLD, &req);
 		MPI_Isend(buf, i + 1, MPI_INT, ROOT, SEND_COMP_TAG, MPI_COMM_WORLD, &req);
 	} while(1);	
