@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 	double start, finish;
 	start = MPI_Wtime();
 	MPI_Status status;
-	//MPI_Request req;
+	MPI_Request req;
 	Display *display;
 	Window window;      //initialization for a window
 	int screen;         //which screen 
@@ -122,7 +122,7 @@ int main(int argc, char** argv)
 			}
 		}
 		else{
-			MPI_Send(&repeats[k*pernode*height],(max_i-k*pernode)*height,MPI_INT,ROOT,0,MPI_COMM_WORLD);//,&req);
+			MPI_Isend(&repeats[k*pernode*height],(max_i-k*pernode)*height,MPI_INT,ROOT,0,MPI_COMM_WORLD),&req);
 		}
 	}
 	
